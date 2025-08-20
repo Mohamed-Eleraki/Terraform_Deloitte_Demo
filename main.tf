@@ -7,13 +7,14 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket       = "erakiterrafromstatefiles"
-    key          = "Deloitte_demo.tfstate"
-    region       = "us-east-1"
-    profile      = "eraki" # Change this to your AWS profile name
-    use_lockfile = true
-  }
+  # Sample of remote state configuration using S3
+  #   backend "s3" {
+  #     bucket       = "erakiterrafromstatefiles"
+  #     key          = "Deloitte_demo.tfstate"
+  #     region       = "us-east-1"
+  #     profile      = "eraki" # Change this to your AWS profile name
+  #     use_lockfile = true
+  #   }
 }
 
 # Sample for Terraform Cloud configuration
