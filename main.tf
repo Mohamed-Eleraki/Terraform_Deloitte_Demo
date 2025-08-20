@@ -9,10 +9,10 @@ terraform {
 
   # Sample of remote state configuration using S3
   #   backend "s3" {
-  #     bucket       = "erakiterrafromstatefiles"
+  #     bucket       = "terrafromstatefiles"
   #     key          = "Deloitte_demo.tfstate"
   #     region       = "us-east-1"
-  #     profile      = "eraki" # Change this to your AWS profile name
+  #     profile      = "kx_demo_temp" # Change this to your AWS profile name
   #     use_lockfile = true
   #   }
 }
@@ -33,7 +33,7 @@ terraform {
 
 provider "aws" {
   region  = "us-east-1"
-  profile = "eraki" # Change this to your AWS profile name
+  profile = "kx_demo" # Change this to your AWS profile name
 }
 
 # Deploy a VPC 1
@@ -41,7 +41,9 @@ resource "aws_vpc" "vpc_1" {
   cidr_block = "10.0.0.0/16"
 
   tags = {
-    Name = "vpc_1"
+    Name        = "vpc_1",
+    Environment = "kx_devops_labs",
+    user        = "eraki"
   }
 }
 
@@ -52,7 +54,9 @@ resource "aws_subnet" "public_subnet_1" {
   availability_zone = "us-east-1a"
 
   tags = {
-    Name = "public_subnet_1"
+    Name        = "public_subnet_1",
+    Environment = "kx_devops_labs",
+    user        = "eraki"
   }
 }
 
@@ -61,7 +65,9 @@ resource "aws_internet_gateway" "igw_1" {
   vpc_id = aws_vpc.vpc_1.id
 
   tags = {
-    Name = "igw_1"
+    Name        = "igw_1",
+    Environment = "kx_devops_labs",
+    user        = "eraki"
   }
 }
 
@@ -75,7 +81,9 @@ resource "aws_route_table" "rt_1" {
   }
 
   tags = {
-    Name = "rt_1"
+    Name        = "rt_1",
+    Environment = "kx_devops_labs",
+    user        = "eraki"
   }
 }
 
@@ -85,18 +93,33 @@ resource "aws_route_table_association" "rt_ass_1" {
   route_table_id = aws_route_table.rt_1.id
 }
 
-# Deploy Security group of ec2_1
-resource "aws_security_group" "secgrp_1" {
-  name   = "secgrp_1"
-  vpc_id = aws_vpc.vpc_1.id
+# # Deploy ec2 in public subnet
+resource "aws_instance" "ec2_1" {
+  ami                         = "ami-0a3c3a20c09d6f377"
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.public_subnet_1.id
+  associate_public_ip_address = true
+  # vpc_security_group_ids      = [aws_security_group.secgrp_1.id]
 
   tags = {
-    Name = "secgrp_1"
+    Name        = "ec2_1",
+    Environment = "kx_devops_labs",
+    user        = "eraki"
   }
 }
 
-# Example to allow inbound traffic on port 22 in order to SSH into the instance
+# # Deploy Security group of ec2_1
+# resource "aws_security_group" "secgrp_1" {
+#   name   = "secgrp_1"
+#   vpc_id = aws_vpc.vpc_1.id
 
+#   tags = {
+#     Name        = "secgrp_1",
+#     Environment = "kx_devops_labs"
+#   }
+# }
+
+# Example to allow inbound traffic on port 22 in order to SSH into the instance
 # Deploy ingress rules
 # resource "aws_vpc_security_group_ingress_rule" "Ingress_Allow_SSH" {
 #   security_group_id = aws_security_group.secgrp_1.id
@@ -111,30 +134,4 @@ resource "aws_security_group" "secgrp_1" {
 #   security_group_id = aws_security_group.secgrp_1.id
 #   cidr_ipv4         = "0.0.0.0/0"
 #   ip_protocol       = "-1" # semantically equivalent to all ports
-# }
-
-# # Deploy ec2 in public subnet
-# resource "aws_instance" "ec2_1" {
-#   ami                         = "ami-0a3c3a20c09d6f377"
-#   instance_type               = "t2.micro"
-#   associate_public_ip_address = true
-#   subnet_id                   = aws_subnet.subnet_2_public.id
-#   vpc_security_group_ids      = [aws_security_group.secgrp_1.id]
-
-#   tags = {
-#     Name = "ec2_1"
-#   }
-# }
-
-# # Deploy ec2 in private subnet
-# resource "aws_instance" "ec2_2" {
-#   ami                         = "ami-0a3c3a20c09d6f377"
-#   instance_type               = "t2.micro"
-#   associate_public_ip_address = true # for Testing purpose
-#   subnet_id                   = aws_subnet.subnet_1_private.id
-#   vpc_security_group_ids      = [aws_security_group.secgrp_1.id]
-
-#   tags = {
-#     Name = "ec2_2"
-#   }
 # }
